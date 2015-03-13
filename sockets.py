@@ -62,26 +62,64 @@ class World:
 myWorld = World()        
 
 def set_listener( entity, data ):
-    ''' do something with the update ! '''
+    do something
 
 myWorld.add_set_listener( set_listener )
-        
+clients = list()
+ 
+class Client:
+    def __init__(self):
+        self.queue = queue.Queue()
+
+    def put(self, v):
+        self.queue.put_nowait(v)
+
+    def get(self):
+        return self.queue.get()
+
 @app.route('/')
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    return None
+    return flask.redirect("static/index.html")
 
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
     # XXX: TODO IMPLEMENT ME
-    return None
+    # Code used from https://github.com/abramhindle/WebSocketsExamples/blob/master/broadcaster.py
+    # By Abram Hindle
+    try:
+        while True:
+            msg = ws.receive()
+            print "Receieved: %s" % msg
+            if (msg is not None):
+                packet = json.loads(msg)
+                send_all_json(packet)
+            else:
+                break
+    except:
+        '''Done'''
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
     # XXX: TODO IMPLEMENT ME
-    return None
+    # Code used from https://github.com/abramhindle/WebSocketsExamples/blob/master/broadcaster.py
+    # By Abram Hindle
+    client = Client()
+    clients.append(client)
+    g = gevent.spawn( read_ws, ws, client)
+    print "Subscribing"
+    try:
+        while True:
+            msg = client.get()
+            print "Got message!"
+            ws.send(msg)
+    except Exception as e:
+        print "WS Error: %S" % e
+    finally:
+        clients.remove(client)
+        gevent.kill(g)
 
 
 def flask_post_json():
