@@ -22,6 +22,7 @@ import time
 import json
 import os
 
+gevents = list()
 app = Flask(__name__)
 sockets = Sockets(app)
 app.debug = True
@@ -67,6 +68,13 @@ def set_listener( entity, data ):
 myWorld.add_set_listener( set_listener )
 clients = list()
  
+def send_all(msg):
+    for client in clients:
+        client.put(msg)
+
+def send_all_json(obj):
+    send_all(json.dumps(obj))
+
 class Client:
     def __init__(self):
         self.queue = queue.Queue()
