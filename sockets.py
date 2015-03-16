@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 import flask
-from flask import Flask, request
+from flask import Flask, request, redirect
 from flask_sockets import Sockets
 import gevent
 from gevent import queue
@@ -63,7 +63,9 @@ class World:
 myWorld = World()        
 
 def set_listener( entity, data ):
-    do something
+    msg = dict()
+    msg[entity] = data
+    send_all_json(msg)
 
 myWorld.add_set_listener( set_listener )
 clients = list()

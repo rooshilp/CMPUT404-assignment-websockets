@@ -54,8 +54,15 @@ function drawCircle(context,entity) {
         //moveTo(x,y);
         fillStyle = entity["colour"];
         strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        stroke();                                
+        // Smiley code from https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_shapes
+        arc(x, y, 50, 0,Math.PI*2,true); // Outer circle
+        moveTo(x+35, y);
+        arc(x, y, 35, 0,Math.PI,false);  // Mouth (clockwise)
+        moveTo(x-10, y-10);
+        arc(x-15, y-10, 5, 0,Math.PI*2,true);  // Left eye
+        moveTo(x+20, y-10);
+        arc(x+15, y-10, 5, 0,Math.PI*2,true);  // Right eye
+        stroke();
     }
 }
 
@@ -125,6 +132,9 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
+    var msg = {}
+    msg[entity] = data
+    socket.send(JSON.stringify(msg))
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -239,7 +249,7 @@ mouse.mouseuppers.push(function(x,y,clicked,e) {
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'green',
+    addEntityWithoutName({'x':x,'y':y,'colour':'yellow',
                           'radius':10});
 });
 
@@ -261,7 +271,16 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //XXX: TODO What are you going to do here?
+            // Implementation from https://github.com/abramhindle/WebSocketsExamples/blob/master/static/broadcast.html
+            // By Abram Hindle
+            var message = JSON.parse(msg.data);
+            
+            for (entity in message) {
+                world[entity] = message[entity]
+            }
+            drawNextFrame();
+
         } catch (e) {
             alert("socket on message: " + e);
         }
