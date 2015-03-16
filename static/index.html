@@ -272,8 +272,6 @@ function wsSetup() {
         try {
             debug("WebSocket Recv:" + msg.data);
             //XXX: TODO What are you going to do here?
-            // Implementation from https://github.com/abramhindle/WebSocketsExamples/blob/master/static/broadcast.html
-            // By Abram Hindle
             var message = JSON.parse(msg.data);
             
             for (entity in message) {

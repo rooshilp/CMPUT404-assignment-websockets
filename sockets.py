@@ -62,6 +62,8 @@ class World:
 
 myWorld = World()        
 
+# Code used from https://github.com/abramhindle/WebSocketsExamples/blob/master/broadcaster.py
+# By Abram Hindle
 def set_listener( entity, data ):
     msg = dict()
     msg[entity] = data
